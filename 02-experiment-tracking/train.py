@@ -8,9 +8,6 @@ from sklearn.metrics import mean_squared_error
 import mlflow
 
 
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
-mlflow.set_experiment("nyc-taxi-experiment")
-
 
 def load_pickle(filename: str):
     with open(filename, "rb") as f_in:
@@ -25,6 +22,7 @@ def load_pickle(filename: str):
 )
 def run_train(data_path: str):
     with mlflow.start_run():
+
 
         mlflow.set_tag("model", "RandomForestRegressor")
 
@@ -43,12 +41,16 @@ def run_train(data_path: str):
         rmse = mean_squared_error(y_val, y_pred, squared=False)
         
         mlflow.log_metric("rmse", rmse)
+        #mlflow.log_artifacts("artifacts")
+        
 
 
 if __name__ == '__main__':
     
     mlflow.set_tracking_uri("sqlite:///mlflow.db")
     mlflow.set_experiment("green-taxi-experiment")
+    mlflow.sklearn.autolog()
+
     run_train()
 
-# mlflow ui --backend-store-url sqlite:///mlflow.db
+# mlflow ui --backend-store-uri sqlite:///mlflow.db  --default-artifact-root https://localhost:5000/artifacts 
