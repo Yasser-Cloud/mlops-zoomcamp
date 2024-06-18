@@ -1,30 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # In[1]:
-
-
-# get_ipython().system('pip freeze | grep scikit-learn')
-
-
-# # In[2]:
-
-
-# get_ipython().system('python -V')
-
-
-# # In[4]:
-
-
+from flask import Flask, request, jsonify
 import pickle
 import pandas as pd
 
 
-# In[14]:
 
 
-with open('model.bin', 'rb') as f_in:
-    dv, model = pickle.load(f_in)
 
 
 # In[3]:
@@ -51,6 +34,10 @@ def read_data(filename):
 df = read_data('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-04.parquet')
 
 
+with open('model.bin', 'rb') as f_in:
+    dv, model = pickle.load(f_in)
+
+
 # In[15]:
 
 
@@ -65,20 +52,54 @@ y_pred = model.predict(X_val)
 print(y_pred.mean())
 
 
-# In[19]:
+
+
+import requests
 
 
 
 
-
-# In[17]:
-
-
-df['ride_id'] = f'{2023:04d}/{4:02d}_' + df.index.astype('str')
+app = Flask('duration-prediction')
 
 
-# In[ ]:
+@app.route('/starter', methods=['POST'])
+def predict_endpoint():
+    # ride = request.get_json()
+    # year = ride['year']
+    # month = ride['month']
+
+    df = read_data('https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-05.parquet')
+
+
+    with open('model.bin', 'rb') as f_in:
+        dv, model = pickle.load(f_in)
 
 
 
+    dicts = df[categorical].to_dict(orient='records')
+    X_val = dv.transform(dicts)
+    y_pred = model.predict(X_val)
+
+    features = prepare_features(ride)
+    pred = predict(features)
+
+    result = {
+        'duration_mean': pred.mean()
+    }
+
+    return jsonify(result)
+
+
+if __name__ == "__main__":
+    ride = {
+    "year": 2023,
+    "month": 5,
+
+    }
+    import requests
+
+    url = 'http://localhost:9696/starter'
+    response = requests.post(url, json=ride)
+    print(response.json())
+    app.run(debug=True, host='0.0.0.0', port=9696)
 

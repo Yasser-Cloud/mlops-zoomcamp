@@ -8,6 +8,8 @@ scikit-learn = "==1.5.0"
 flask = "*"
 pandas = "*"
 pyarrow = "*"
+gunicorn = "*"
+requests = "*"
 
 [dev-packages]
 
